@@ -25,3 +25,8 @@ CREATE TABLE books (
                        authorId INT,
                        FOREIGN KEY (authorId) REFERENCES authors(id)
 );
+
+
+
+INSERT INTO Authors (firstName, lastName, birthDate, nationality)
+VALUES ('Joanne', 'Rowling', '1965-07-31', 'British');
