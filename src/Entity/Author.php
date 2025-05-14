@@ -7,6 +7,7 @@ class Author
     private string $lastName;
     private DateTime $birthDate;
     private string $nationality;
+    private array $books;
 
 
     function __construct(  string $firstName, string $lastName, string $birthDate, string $nationality, ?int $id=null)
@@ -63,6 +64,17 @@ class Author
     {
         $this->nationality = $nationality;
     }
+
+
+    public function getBooks() : array
+    {
+        $books = new BookRepository();
+        $books = $books->getAuthor($this->getId());
+        return $books;
+
+
+    }
+
 
 
 

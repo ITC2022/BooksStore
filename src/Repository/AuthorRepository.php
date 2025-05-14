@@ -31,7 +31,7 @@ class AuthorRepository
 
 
 
-    public  function findById( $id): Author
+    public function findById( $id): Author
     {
         $dbcon = Db::getDbConnection();
         $stmnt = "SELECT * FROM authors WHERE id = ?";
@@ -44,7 +44,7 @@ class AuthorRepository
 
     }
 
-    public  function update(Author $author): Author
+    public function update(Author $author): Author
     {
         $id = $author->getId();
         $firstName= $author->getFirstName();
@@ -61,7 +61,7 @@ class AuthorRepository
     }
 
 
-    public  function create(Author $author) : Author
+    public function create(Author $author) : Author
     {
 
         $firstName= $author->getFirstName();
@@ -77,7 +77,7 @@ class AuthorRepository
 
     }
 
-    public  function delete(Author $author): bool
+    public function delete(Author $author): bool
     {
         $id= $author->getId();
         $dbcon = Db::getDbConnection();
