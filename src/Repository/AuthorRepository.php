@@ -1,16 +1,14 @@
 <?php
-
-class AuthorRepository
+//namespace App\Repository;\
+include_once "AbstractRepository.php";
+class AuthorRepository extends AbstractRepository
 {
-
-
-
 
 
 
     public  function findAll() :array | Author{
         $author = [];
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "SELECT * FROM authors";
         $request = $dbcon->prepare($stmnt);
         $request->execute();
@@ -33,7 +31,7 @@ class AuthorRepository
 
     public function findById( $id): Author
     {
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "SELECT * FROM authors WHERE id = ?";
         $request = $dbcon->prepare($stmnt);
         $request->execute([$id]);
@@ -53,7 +51,7 @@ class AuthorRepository
         $nationality = $author->getNationality();
 
 
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "UPDATE authors SET  firstname=?, lastName=?, birthDate=?, nationality=? WHERE id=?" ;
         $request = $dbcon->prepare($stmnt);
         $request->execute([$firstName,$lastName,$birthDate,$nationality,$id]);
@@ -68,7 +66,7 @@ class AuthorRepository
         $lastName = $author->getLastName();
         $birthDate= $author->getBirthDate()->format("Y-m-d");
         $nationality = $author->getNationality();
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "INSERT INTO authors (firstName, lastName, birthDate, nationality) VALUES (?,?,?,?)";
         $request = $dbcon->prepare($stmnt);
         $request->execute([$firstName,$lastName,$birthDate,$nationality]);
@@ -80,7 +78,7 @@ class AuthorRepository
     public function delete(Author $author): bool
     {
         $id= $author->getId();
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "DELETE FROM authors WHERE id = ?";
         $request = $dbcon->prepare($stmnt);
         return $request->execute([$id]);

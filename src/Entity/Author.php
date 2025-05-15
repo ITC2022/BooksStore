@@ -1,5 +1,5 @@
 <?php
-
+//namespace App\Entity;
 class Author
 {
     private ?int $id;
@@ -18,6 +18,10 @@ class Author
         $this->birthDate = new DateTime($birthDate);
         $this->nationality= $nationality;
         $this->id = $id;
+        $bookrepo = new BookRepository();
+        $this->books = $bookrepo->getAuthor($this);
+
+
     }
 
     public function getId(): int
@@ -65,15 +69,25 @@ class Author
         $this->nationality = $nationality;
     }
 
-
-    public function getBooks() : array
+    public function getBooks(): array
     {
-        $books = new BookRepository();
-        $books = $books->getAuthor($this->getId());
-        return $books;
-
-
+        return $this->books;
     }
+
+    public function setBooks(array $books): void
+    {
+        $this->books = $books;
+    }
+
+
+//    public function getBooks() : array
+//    {
+//        $books = new BookRepository();
+//        $books = $books->getAuthor($this->getId());
+//        return $books;
+//
+//
+//    }
 
 
 

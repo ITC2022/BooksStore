@@ -1,11 +1,15 @@
 <?php
+//namespace App\Repository;
+include_once "AbstractRepository.php";
 
-class BookRepository
+class BookRepository extends AbstractRepository
 {
-    public function findAll(): array |Book
+
+
+    public function findAll(): array
     {
         $books =[];
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "SELECT * FROM books";
         $request = $dbcon->prepare($stmnt);
         $request->execute();
@@ -23,7 +27,7 @@ class BookRepository
 
     public function findById( $id): Book
     {
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "SELECT * FROM books WHERE id = ?";
         $request = $dbcon->prepare($stmnt);
         $request->execute([$id]);
@@ -52,7 +56,7 @@ class BookRepository
         $id = $book->getId();
 
 
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "UPDATE books SET  title=?, isbn=?, description=?, publicationDate=?, pageCount=?, language=?, publisher=?, category=?, price=?, coverUrl=?, binding=?, authorId=? WHERE id=?" ;
         $request = $dbcon->prepare($stmnt);
         $request->execute([$title,$isbn,$description,$publicationDate,$pageCount,$language,$publisher,$category,$price,$coverUrl,$binding,$authorId,$id]);
@@ -76,7 +80,7 @@ class BookRepository
         $authorId = $book->getAuthorId();
 
 
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "INSERT INTO books (title, isbn, description, publicationDate, pageCount, language, publisher, category, price, coverUrl, binding, authorId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         $request = $dbcon->prepare($stmnt);
         $request->execute([$title,$isbn,$description,$publicationDate,$pageCount,$language,$publisher,$category,$price,$coverUrl,$binding,$authorId]);
@@ -88,24 +92,25 @@ class BookRepository
     public function delete(Book $book): bool
     {
         $id= $book->getId();
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "DELETE FROM books WHERE id = ?";
         $request = $dbcon->prepare($stmnt);
         return $request->execute([$id]);
 
     }
-    public function getAuthor($id) : array
+    public function getAuthor(Author $author) : array
     {
         $books =[];
+        $id = $author->getId();
 
-        $dbcon = Db::getDbConnection();
+        $dbcon = $this->getDbConnection();
         $stmnt = "SELECT * FROM books WHERE authorId = ? ";
         $request = $dbcon->prepare($stmnt);
         $request->execute([$id]);
         $requeststmnt = $request->fetchAll(PDO::FETCH_ASSOC);
         foreach ($requeststmnt as $item) {
-            $book =new Book($item['title'],$item['isbn'],$item['description'],$item['publicationDate'], $item['pageCount'],$item['language'],$item['publisher'],$item['category'],$item['price'],$item['coverUrl'],$item['binding'],$item['authorId'],$item['id']);
-            $books[] = $book;
+          // $book =new Book($item['title'],$item['isbn'],$item['description'],$item['publicationDate'], $item['pageCount'],$item['language'],$item['publisher'],$item['category'],$item['price'],$item['coverUrl'],$item['binding'],$item['authorId'],$item['id']);
+            $books[] = $item["id"];
 
         }
         return $books;

@@ -1,5 +1,5 @@
 <?php
-
+//namespace App\Entity;
 class Book
 {
 
@@ -47,6 +47,8 @@ private Author $author;
         $this->binding = $binding;
         $this->authorId = $authorId;
         $this->id = $id;
+        $repo = new AuthorRepository();
+        $this->author = $repo->findById($authorId);
     }
 
     public function getId(): int
@@ -175,11 +177,21 @@ private Author $author;
         $this->isbn = $isbn;
     }
 
-    public function getAuthor():Author
+    public function getAuthor(): Author
     {
-        $author = new AuthorRepository();
-        return $author->findById($this->getAuthorId());
+        return $this->author;
     }
+
+    public function setAuthor(Author $author): void
+    {
+        $this->author = $author;
+    }
+
+//    public function getAuthor():Author
+//    {
+//        $author = new AuthorRepository();
+//        return $author->findById($this->getAuthorId());
+//    }
 
 
 
