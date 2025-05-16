@@ -91,15 +91,17 @@ class Author
         $this->books = $books;
     }
 
+    public function objectElements(object $author) : array
+    {
+        $elements= ["firstname"=>$author->getFirstName(),
+            "lastname"=>$author->getLastName(),
+            "birthDate"=>$author->getBirthDate()->format("Y-m-d"),
+            "nationality"=>$author->getNationality()];
+        return $elements;
+    }
 
-//    public function getBooks() : array
-//    {
-//        $books = new BookRepository();
-//        $books = $books->getAuthor($this->getId());
-//        return $books;
-//
-//
-//    }
+
+
 
 
 

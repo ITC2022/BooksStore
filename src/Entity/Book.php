@@ -187,11 +187,22 @@ private Author $author;
         $this->author = $author;
     }
 
-//    public function getAuthor():Author
-//    {
-//        $author = new AuthorRepository();
-//        return $author->findById($this->getAuthorId());
-//    }
+    public function objectElements(object $book) : array
+    {
+        $elements= ["title"=>$book->getTitle(),
+        "isbn"=>$book->getIsbn(),
+         "description"=>$book->getDescription(),
+        "publicationDate"=>$book->getPublicationDate()->format("Y-m-d"),
+            "pageCount"=>$book->getPageCount(),
+            "language"=>$book->getLanguage(),
+            "publisher"=>$book->getPublisher(),
+            "category"=>$book->getCategory(),
+            "price"=>$book->getPrice(),
+            "coverUrl"=>$book->getCoverUrl(),
+        "binding"=>$book->getBinding(),
+        "authorId"=>$book->getAuthorId()];
+        return $elements;
+    }
 
 
 

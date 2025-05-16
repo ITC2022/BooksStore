@@ -35,25 +35,9 @@ $books = $booksen->findAll();
 //var_dump($booksen->delete($berto));
 
 //var_dump($books);
-$html ="";
-foreach ($books as $book){
-    $html .= "<div class='col'>";
-    $html .= "<div class='card shadow-sm'>";
-//    $html.= "<h5 style='text-align: center'>".$book->getTitle()."</h5>";
-    $html .= "<img src='" . $book->getCoverUrl() . "' class='bd-placeholder-img card-img-top' height='650' style='object-fit: cover;' alt='Copertina di " . htmlspecialchars($book->getTitle()) . "'>";
-    $html .= "<div class='card-body'><h6 style='text-align: center' class='title'><strong>".$book->getTitle()."</strong></h6><p class='card-text' >".$book->getDescription()."</p>
-                        <div class='d-flex justify-content-between align-items-center'>
-                            <div class='btn-group'>
-                                <button type='submit' class='btn btn-s btn-outline-info' >Show</button>
-                                <button type='button' class='btn btn-s btn-success'>Buy</button>
-                            </div>
-                            <small class='text-body-primary'>".number_format($book->getPrice(), 2, '.')." €</small></div>
-                    </div>
-                </div>
-            </div>";
 
 
-}
+$action = $_REQUEST['action'] ?? "book";
 
 
 
@@ -61,8 +45,6 @@ foreach ($books as $book){
 
 
 
-
-
-include "view/book/index.php";
+include "view/".$action."/index.php";
 
 

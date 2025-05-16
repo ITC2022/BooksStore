@@ -1,5 +1,23 @@
 <?php
+$html ="";
+foreach ($books as $book){
+    $html .= "<div class='col'>";
+    $html .= "<div class='card shadow-sm'>";
+//    $html.= "<h5 style='text-align: center'>".$book->getTitle()."</h5>";
+    $html .= "<img src='" . $book->getCoverUrl() . "' class='bd-placeholder-img card-img-top' height='650' style='object-fit: cover;' alt='Copertina di " . htmlspecialchars($book->getTitle()) . "'>";
+    $html .= "<div class='card-body'><h6 style='text-align: center' class='title'><strong>".$book->getTitle()."</strong></h6><p class='card-text' >".$book->getDescription()."</p>
+                        <div class='d-flex justify-content-between align-items-center'>
+                            <div class='btn-group'>
+                                <button type='submit' class='btn btn-s btn-outline-info' >Show</button>
+                                <button type='button' class='btn btn-s btn-success'>Buy</button>
+                            </div>
+                            <small class='text-body-primary'>".number_format($book->getPrice(), 2, '.')." €</small></div>
+                    </div>
+                </div>
+            </div>";
 
+
+}
 ?>
 
 <!doctype html>
@@ -9,7 +27,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Books</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
 </head>
@@ -36,38 +54,17 @@
 </div>
 
 <!--ende header-->
-<!--product start-->
 
-<!--<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-body-tertiary">-->
-<!--    <div class="col-md-6 p-lg-5 mx-auto my-5"><h1 class="display-3 fw-bold">Designed for engineers</h1>-->
-<!--        <h3 class="fw-normal text-muted mb-3">Build anything you want with Aperture</h3>-->
-<!--        <div class="d-flex gap-3 justify-content-center lead fw-normal"><a class="icon-link" href="#">-->
-<!--                Learn more-->
-<!--                <svg class="bi" aria-hidden="true">-->
-<!--                    <use xlink:href="#chevron-right"></use>-->
-<!--                </svg>-->
-<!--            </a> <a class="icon-link" href="#">-->
-<!--                Buy-->
-<!--                <svg class="bi" aria-hidden="true">-->
-<!--                    <use xlink:href="#chevron-right"></use>-->
-<!--                </svg>-->
-<!--            </a></div>-->
-<!--    </div>-->
-<!--    <div class="product-device shadow-sm d-none d-md-block"></div>-->
-<!--    <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>-->
-<!--</div>-->
-
-<!--product end-->
 <!--start hero-->
 
 <div class="bg-light text-secondary px-4 py-5 text-center border-bottom">
-    <div class="py-5"><h1 class="display-5 fw-bold text-dark">Meet Our Authors</h1>
-        <div class="col-lg-6 mx-auto"><p class="fs-5 mb-4">Explore the brilliant minds behind our bestselling books.
-                Dive into their stories, styles, and inspirations and find your next favorite read. Whether you're
-                into fiction, history, or self-help, our diverse range of authors has something for everyone.</p>
+    <div class="py-5"><h1 class="display-5 fw-bold text-dark">Discover Our Books</h1>
+        <div class="col-lg-6 mx-auto"><p class="fs-5 mb-4">Discover a curated collection of books across every genre. From gripping fiction to insightful non-fiction,
+                find stories that captivate, educate, and inspire. Whether you're searching for timeless classics or modern favorites,
+                your next great read is just a page away.</p>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Authors</button>
-                <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Books</button>
+              <a href ="index.php?action=author"> <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Authors</button></a>
+             <a href ="index.php?action=book">   <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Books</button></a>
             </div>
         </div>
     </div>
