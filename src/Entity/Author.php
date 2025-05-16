@@ -2,7 +2,7 @@
 //namespace App\Entity;
 class Author
 {
-    private ?int $id;
+    private int $id;
     private string $firstName;
     private string $lastName;
     private DateTime $birthDate;
@@ -13,16 +13,28 @@ class Author
     function __construct(  string $firstName, string $lastName, string $birthDate, string $nationality, ?int $id=null)
     {
 
+        if($id !== NULL){
+            $this->id = $id;
+
+            $bookrepo = new BookRepository();
+            $this->books = $bookrepo->getAuthor($this);
+        }else{
+            $this->books = [];
+        }
+
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->birthDate = new DateTime($birthDate);
         $this->nationality= $nationality;
-        $this->id = $id;
-        $bookrepo = new BookRepository();
-        $this->books = $bookrepo->getAuthor($this);
+
+
+
+
 
 
     }
+
+
 
     public function getId(): int
     {

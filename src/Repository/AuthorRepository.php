@@ -6,14 +6,12 @@ class AuthorRepository extends AbstractRepository
 
 
 
-    public  function findAll() :array | Author{
-        $author = [];
-        $dbcon = $this->getDbConnection();
+    public  function findAll() :array | Author
+    {
+        $authors = [];
         $stmnt = "SELECT * FROM authors";
-        $request = $dbcon->prepare($stmnt);
-        $request->execute();
-        $requestStmnt = $request->fetchAll(PDO::FETCH_ASSOC);
 
+        $requestStmnt=  $this->query($stmnt , $authors);
         foreach ($requestStmnt as $item) {
             $author =new Author($item['firstName'],$item['lastName'],$item['birthDate'], $item['nationality'],$item['id']);
             $authors[] = $author;
@@ -31,11 +29,13 @@ class AuthorRepository extends AbstractRepository
 
     public function findById( $id): Author
     {
-        $dbcon = $this->getDbConnection();
+
+
+
+
         $stmnt = "SELECT * FROM authors WHERE id = ?";
-        $request = $dbcon->prepare($stmnt);
-        $request->execute([$id]);
-        $authorRequest= $request->fetch(PDO::FETCH_ASSOC);
+        $authorRequest = $this->query($stmnt, [$id]);
+        $authorRequest = $authorRequest[0];
         $author = new Author($authorRequest['firstName'],$authorRequest['lastName'],$authorRequest['birthDate'],$authorRequest['nationality'], $authorRequest['id']);
         return $author;
 
@@ -44,17 +44,23 @@ class AuthorRepository extends AbstractRepository
 
     public function update(Author $author): Author
     {
-        $id = $author->getId();
+
+
         $firstName= $author->getFirstName();
         $lastName = $author->getLastName();
         $birthDate= $author->getBirthDate()->format("Y-m-d");
         $nationality = $author->getNationality();
-
-
-        $dbcon = $this->getDbConnection();
+        $id = $author->getId();
         $stmnt = "UPDATE authors SET  firstname=?, lastName=?, birthDate=?, nationality=? WHERE id=?" ;
-        $request = $dbcon->prepare($stmnt);
-        $request->execute([$firstName,$lastName,$birthDate,$nationality,$id]);
+        $params = [$firstName,$lastName,$birthDate,$nationality,$id];
+
+        $this->query($stmnt,$params);
+
+
+//        $dbcon = $this->getDbConnection();
+//
+//        $request = $dbcon->prepare($stmnt);
+//        $request->execute([$firstName,$lastName,$birthDate,$nationality,$id]);
         return self::findById($id);
     }
 
@@ -66,22 +72,32 @@ class AuthorRepository extends AbstractRepository
         $lastName = $author->getLastName();
         $birthDate= $author->getBirthDate()->format("Y-m-d");
         $nationality = $author->getNationality();
-        $dbcon = $this->getDbConnection();
         $stmnt = "INSERT INTO authors (firstName, lastName, birthDate, nationality) VALUES (?,?,?,?)";
-        $request = $dbcon->prepare($stmnt);
-        $request->execute([$firstName,$lastName,$birthDate,$nationality]);
-        $id = (int)$dbcon->lastInsertId();
+        $params = [$firstName,$lastName,$birthDate,$nationality];
+
+
+        $id = $this->query($stmnt, $params);
+//        $dbcon = $this->getDbConnection();
+//        $stmnt = "INSERT INTO authors (firstName, lastName, birthDate, nationality) VALUES (?,?,?,?)";
+//        $request = $dbcon->prepare($stmnt);
+//        $request->execute([$firstName,$lastName,$birthDate,$nationality]);
+//        $id = (int)$this->getDbConnection()->lastInsertId();
+        var_dump($id);
         return self::findById($id);
+
 
     }
 
     public function delete(Author $author): bool
     {
         $id= $author->getId();
-        $dbcon = $this->getDbConnection();
         $stmnt = "DELETE FROM authors WHERE id = ?";
-        $request = $dbcon->prepare($stmnt);
-        return $request->execute([$id]);
+        return $this->query($stmnt,[$id]);
+
+//        $dbcon = $this->getDbConnection();
+//
+//        $request = $dbcon->prepare($stmnt);
+//        return $request->execute([$id]);
 
     }
 

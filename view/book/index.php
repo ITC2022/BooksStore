@@ -3,7 +3,7 @@
 ?>
 
 <!doctype html>
-<html lang="en"   >
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -18,13 +18,13 @@
 
 <!--hier ist mein Header -->
 
-<div class="container">
-    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom "><a href="/"
-                                                                                        class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-            <img src="svgs/book-saved-svgrepo-com.svg" class="bi me-2" width="40" height="32" aria-hidden="true">
+<div class="container-fluid bg-secondary text-white">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4  "><a href="/"
+                                                                                        class="d-flex align-items-center mb-2 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+            <img src="svgs/book-saved-svgrepo-com.svg" class="bi me-2" width="50" height="50" aria-hidden="true">
 
 
-            <span class="fs-4">Bibliophile</span> </a>
+            <span class="fs-4">Readora</span> </a>
         <ul class="nav nav-pills">
             <li class="nav-item"><a href="#" class="nav-link active bg-dark" aria-current="page">Home</a></li>
             <li class="nav-item"><a href="#" class="nav-link text-black">Features</a></li>
@@ -36,17 +36,38 @@
 </div>
 
 <!--ende header-->
+<!--product start-->
 
+<!--<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-body-tertiary">-->
+<!--    <div class="col-md-6 p-lg-5 mx-auto my-5"><h1 class="display-3 fw-bold">Designed for engineers</h1>-->
+<!--        <h3 class="fw-normal text-muted mb-3">Build anything you want with Aperture</h3>-->
+<!--        <div class="d-flex gap-3 justify-content-center lead fw-normal"><a class="icon-link" href="#">-->
+<!--                Learn more-->
+<!--                <svg class="bi" aria-hidden="true">-->
+<!--                    <use xlink:href="#chevron-right"></use>-->
+<!--                </svg>-->
+<!--            </a> <a class="icon-link" href="#">-->
+<!--                Buy-->
+<!--                <svg class="bi" aria-hidden="true">-->
+<!--                    <use xlink:href="#chevron-right"></use>-->
+<!--                </svg>-->
+<!--            </a></div>-->
+<!--    </div>-->
+<!--    <div class="product-device shadow-sm d-none d-md-block"></div>-->
+<!--    <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>-->
+<!--</div>-->
+
+<!--product end-->
 <!--start hero-->
 
-<div class="bg-light text-secondary px-4 py-5 text-center">
-    <div class="py-5"><h1 class="display-5 fw-bold text-dark">Discover our authors</h1>
-        <div class="col-lg-6 mx-auto"><p class="fs-5 mb-4">Quickly design and customize responsive mobile-first sites
-                with Bootstrap, the world’s most popular front-end open source toolkit, featuring Sass variables and
-                mixins, responsive grid system, extensive prebuilt components, and powerful JavaScript plugins.</p>
+<div class="bg-light text-secondary px-4 py-5 text-center border-bottom">
+    <div class="py-5"><h1 class="display-5 fw-bold text-dark">Meet Our Authors</h1>
+        <div class="col-lg-6 mx-auto"><p class="fs-5 mb-4">Explore the brilliant minds behind our bestselling books.
+                Dive into their stories, styles, and inspirations and find your next favorite read. Whether you're
+                into fiction, history, or self-help, our diverse range of authors has something for everyone.</p>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Custom button</button>
-                <button type="button" class="btn btn-outline-dark btn-lg px-4">Secondary</button>
+                <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Authors</button>
+                <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Books</button>
             </div>
         </div>
     </div>
@@ -87,7 +108,7 @@
 
 
 <!--footer start-->
-<div class="container">
+<div class="container-fluid bg-secondary text-dark px-4 py-5 text-center">
     <footer class="py-5">
         <div class="row">
             <div class="col-6 col-md-2 mb-3"><h5>Section</h5>
@@ -130,8 +151,8 @@
             </div>
         </div>
         <div class="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top"><p><img
-                        src="svgs/book-saved-svgrepo-com.svg" class="bi me-2" width="40" height="32" aria-hidden="true">©
-                2025 Bibliophile, Inc.
+                        src="svgs/book-saved-svgrepo-com.svg" alt="Readora Logo a book logo" class="bi me-2" width="42" height="38" aria-hidden="true">©
+                2025 Readora, Inc.
                 All rights reserved.</p>
             <ul class="list-unstyled d-flex">
                 <li class="ms-3"><a class="link-body-emphasis" href="#" aria-label="Instagram">
@@ -165,7 +186,6 @@
             p.textContent = words.slice(0, maxWords).join(" ") + "...";
         }
     });
-
 
 
 </script>
