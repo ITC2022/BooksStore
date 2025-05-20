@@ -1,83 +1,77 @@
 <?php
 //namespace App\Entity;
-class Author
+class Author implements EntityInterface
 {
-    private int $id;
-    private string $firstName;
-    private string $lastName;
-    private DateTime $birthDate;
-    private string $nationality;
+    private ?int $id;
+    private string $fname;
+    private string $lname;
+    private DateTime $bday;
+    private string $country;
+
     private array $books;
 
-    function __construct(  string $firstName, string $lastName, string $birthDate, string $nationality, ?int $id=null)
+    /**
+     * @param DateTime $bday
+     * @param string $country
+     * @param string $fname
+     * @param int|null $id
+     * @param string $lname
+     */
+    public function __construct(array $data)
     {
-
-        if($id !== NULL){
-            $this->id = $id;
-
-            $bookrepo = new BookRepository();
-            $this->books = $bookrepo->getAuthor($this);
-        }else{
-            $this->books = [];
-        }
-
-        $this->firstName = $firstName;
-        $this->lastName = $lastName;
-        $this->birthDate = new DateTime($birthDate);
-        $this->nationality= $nationality;
-
-
-
-
-
-
+        $this->bday = new DateTime($data['bday']);
+        $this->country = $data['country'];
+        $this->fname = $data['fname'];
+        $this->id = $data['id'] ?? null;
+        $this->lname = $data['lname'];
+        $bookrepo = new BookRepository();
+        $this->books = $bookrepo->findByAuthor($this);
     }
 
+    public function getBday(): DateTime
+    {
+        return $this->bday;
+    }
 
+    public function setBday(DateTime $bday): void
+    {
+        $this->bday = $bday;
+    }
 
-    public function getId(): int
+    public function getCountry(): string
+    {
+        return $this->country;
+    }
+
+    public function setCountry(string $country): void
+    {
+        $this->country = $country;
+    }
+
+    public function getFname(): string
+    {
+        return $this->fname;
+    }
+
+    public function setFname(string $fname): void
+    {
+        $this->fname = $fname;
+    }
+
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getFirstName(): string
+
+    public function getLname(): string
     {
-        return $this->firstName;
+        return $this->lname;
     }
 
-    public function setFirstName(string $firstName): void
+    public function setLname(string $lname): void
     {
-        $this->firstName = $firstName;
-    }
-
-    public function getLastName(): string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): void
-    {
-        $this->lastName = $lastName;
-    }
-
-    public function getBirthDate(): DateTime
-    {
-        return $this->birthDate;
-    }
-
-    public function setBirthDate(DateTime $birthDate): void
-    {
-        $this->birthDate = $birthDate;
-    }
-
-    public function getNationality(): string
-    {
-        return $this->nationality;
-    }
-
-    public function setNationality(string $nationality): void
-    {
-        $this->nationality = $nationality;
+        $this->lname = $lname;
     }
 
     public function getBooks(): array
@@ -90,13 +84,11 @@ class Author
         $this->books = $books;
     }
 
-    public function objectElements(object $author) : array
+
+    public function mapToArray():array
     {
-        $elements= ["firstname"=>$author->getFirstName(),
-            "lastname"=>$author->getLastName(),
-            "birthDate"=>$author->getBirthDate()->format("Y-m-d"),
-            "nationality"=>$author->getNationality()];
-        return $elements;
+        return [':fname'=> $this->getFname(),':lname'=>$this->getLname(),':bday'=>$this->getBday()->format('Y-m-d'),':country'=>$this->getCountry(),':id'=>$this->getId()];
+
     }
 
 }

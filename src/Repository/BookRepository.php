@@ -1,43 +1,29 @@
 <?php
 //namespace App\Repository;
-include_once "AbstractRepository.php";
-
 class BookRepository extends AbstractRepository
 {
 
-    protected string $tableName;
+    protected string $tablename = 'Book';
 
-    public function __construct()
+    /**
+     * @param Author $author
+     * @return Book[]
+     */
+    public function findByAuthor(Author $author): array
     {
-        $this->tableName = str_replace("repository", "", strtolower(BookRepository::class)."s");
-    }
-
-
-    public function putElements($item): object
-    {
-        $book =new Book($item['title'],$item['isbn'],$item['description'],$item['publicationDate'], $item['pageCount'],$item['language'],$item['publisher'],$item['category'],$item['price'],$item['coverUrl'],$item['binding'],$item['authorId'],$item['id']);
-        return $book;
-    }
-
-
-    public function getAuthor(Author $author) : array
-    {
-        $books =[];
-        $stmnt = "SELECT * FROM books WHERE authorId = ? ";
         $id = $author->getId();
-        $requeststmnt = $this->query($stmnt,[$id] );
-        foreach ($requeststmnt as $item) {
-            $books[] = (int)$item["id"];
-
+        $dbcon = $this->Dbcon();
+        $sql = 'SELECT * FROM book where author_id = :author_id';
+        $stm = $dbcon->prepare($sql);
+        $stm->bindParam(':author_id', $id);
+        $stm->execute();
+        $data = $stm->fetchAll(PDO::FETCH_ASSOC);
+        $return = [];
+        foreach ($data as $item) {
+            $return[] = $item['id'];
         }
-        return $books;
+
+        return $return;
+
     }
-
-
-
-
-
-
-
-
 }

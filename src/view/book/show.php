@@ -1,5 +1,8 @@
 <?php
-
+$book = $data["book"];
+$author = $book->getAuthor()->getLastName();
+var_dump($author);
+var_dump($book);
 ?>
 
 <!doctype html>

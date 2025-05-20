@@ -1,120 +1,58 @@
 <?php
-//namespace App\Entity;
-class Book
+class Book implements EntityInterface
 {
 
     private ?int $id;
-    private string $title;
     private string $isbn;
-    private string $description;
-private DateTime $publicationDate;
-private int $pageCount;
-private string $language;
-private string $publisher;
-private string $category;
-private float $price;
-private string $coverUrl;
-private bool $binding;
-private int $authorId;
-
-private Author $author;
+    private DateTime $publicationDate;
+    private int $pages;
+    private string $title;
+    private float $price;
+    private string $category;
+    private bool $hardcover;
+    private Author $author;
 
     /**
-     * @param string $title
-     * @param string $description
-     * @param DateTime $publicationDate
-     * @param int $pageCount
-     * @param string $language
-     * @param string $publisher
      * @param string $category
+     * @param bool $hardcover
+     * @param int $id
+     * @param string $isbn
+     * @param int $pages
      * @param float $price
-     * @param string $coverUrl
-     * @param bool $binding
-     * @param int $authorId
+     * @param DateTime $publicationDate
+     * @param string $title
      */
-    public function __construct(string $title,string $isbn, string $description, string $publicationDate, int $pageCount, string $language, string $publisher, string $category, float $price, string $coverUrl, bool $binding, int $authorId, ?int $id=null)
+    public function __construct($data)
     {
-        $this->title = $title;
-        $this->isbn = $isbn;
-        $this->description = $description;
-        $this->publicationDate = new DateTime($publicationDate);
-        $this->pageCount = $pageCount;
-        $this->language = $language;
-        $this->publisher = $publisher;
-        $this->category = $category;
-        $this->price = $price;
-        $this->coverUrl = $coverUrl;
-        $this->binding = $binding;
-        $this->authorId = $authorId;
-        $this->id = $id;
+        $this->category = $data['category'];
+        $this->hardcover = $data['hardcover'];
+        $this->id = $data["id"] ?? null;
+        $this->isbn = $data["isbn"];
+        $this->pages = $data["pages"];
+        $this->price = $data["price"];
+        $this->publicationDate = new DateTime($data["publication_date"]);
+        $this->title = $data["title"];
         $repo = new AuthorRepository();
-        $this->author = $repo->findById($authorId);
+        $this->author = $repo->findById($data["author_id"]);
     }
 
-    public function getId(): int
+    public function getIsbn(): string
     {
-        return $this->id;
+        return $this->isbn;
     }
 
-
-    public function getTitle(): string
+    public function setIsbn(string $isbn): void
     {
-        return $this->title;
+        $this->isbn = $isbn;
+    }
+    public function getAuthor(): Author
+    {
+        return $this->author;
     }
 
-    public function setTitle(string $title): void
+    public function setAuthor(Author $author): void
     {
-        $this->title = $title;
-    }
-
-    public function getDescription(): string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): void
-    {
-        $this->description = $description;
-    }
-
-    public function getPublicationDate(): DateTime
-    {
-        return $this->publicationDate;
-    }
-
-    public function setPublicationDate(DateTime $publicationDate): void
-    {
-        $this->publicationDate = $publicationDate;
-    }
-
-    public function getPageCount(): int
-    {
-        return $this->pageCount;
-    }
-
-    public function setPageCount(int $pageCount): void
-    {
-        $this->pageCount = $pageCount;
-    }
-
-    public function getLanguage(): string
-    {
-        return $this->language;
-    }
-
-    public function setLanguage(string $language): void
-    {
-        $this->language = $language;
-    }
-
-    public function getPublisher(): string
-    {
-        return $this->publisher;
-    }
-
-    public function setPublisher(string $publisher): void
-    {
-        $this->publisher = $publisher;
+        $this->author = $author;
     }
 
     public function getCategory(): string
@@ -127,6 +65,26 @@ private Author $author;
         $this->category = $category;
     }
 
+    public function isHardcover(): bool
+    {
+        return $this->hardcover;
+    }
+
+    public function setHardcover(bool $hardcover): void
+    {
+        $this->hardcover = $hardcover;
+    }
+
+    public function getPages(): int
+    {
+        return $this->pages;
+    }
+
+    public function setPages(int $pages): void
+    {
+        $this->pages = $pages;
+    }
+
     public function getPrice(): float
     {
         return $this->price;
@@ -137,74 +95,42 @@ private Author $author;
         $this->price = $price;
     }
 
-    public function getCoverUrl(): string
+    public function getPublicationDate(): DateTime
     {
-        return $this->coverUrl;
+        return $this->publicationDate;
     }
 
-    public function setCoverUrl(string $coverUrl): void
+    public function setPublicationDate(DateTime $publicationDate): void
     {
-        $this->coverUrl = $coverUrl;
+        $this->publicationDate = $publicationDate;
     }
 
-    public function getBinding(): bool
+    public function getTitle(): string
     {
-        return $this->binding;
+        return $this->title;
     }
 
-    public function setBinding(bool $binding): void
+    public function setTitle(string $title): void
     {
-        $this->binding = $binding;
+        $this->title = $title;
     }
 
-    public function getAuthorId(): int
+    public function getId(): int
     {
-        return $this->authorId;
-    }
-
-    public function setAuthorId(int $authorId): void
-    {
-        $this->authorId = $authorId;
-    }
-
-    public function getIsbn(): string
-    {
-        return $this->isbn;
-    }
-
-    public function setIsbn(string $isbn): void
-    {
-        $this->isbn = $isbn;
-    }
-
-    public function getAuthor(): Author
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(Author $author): void
-    {
-        $this->author = $author;
-    }
-
-    public function objectElements(object $book) : array
-    {
-        $elements= ["title"=>$book->getTitle(),
-        "isbn"=>$book->getIsbn(),
-         "description"=>$book->getDescription(),
-        "publicationDate"=>$book->getPublicationDate()->format("Y-m-d"),
-            "pageCount"=>$book->getPageCount(),
-            "language"=>$book->getLanguage(),
-            "publisher"=>$book->getPublisher(),
-            "category"=>$book->getCategory(),
-            "price"=>$book->getPrice(),
-            "coverUrl"=>$book->getCoverUrl(),
-        "binding"=>$book->getBinding(),
-        "authorId"=>$book->getAuthorId()];
-        return $elements;
+        return $this->id;
     }
 
 
-
-
+    public function mapToArray(): array
+    {
+        return [':isbn'=>$this->getIsbn(),
+            ':publication_date'=>$this->getPublicationDate()->format('Y-m-d'),
+            ':pages'=>$this->getPages(),
+            ':title'=>$this->getTitle(),
+            ':price'=>$this->getPrice(),
+            ':category'=>$this->getCategory(),
+            ':hardcover'=>$this->isHardcover(),
+            ':author_id'=>$this->getAuthor()->getId(),
+            ':id'=>$this->getId()];
+    }
 }

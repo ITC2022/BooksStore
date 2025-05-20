@@ -1,5 +1,5 @@
 <?php
-$html ="";
+/*$html ="";
 foreach ($books as $book){
     $html .= "<div class='col'>";
     $html .= "<div class='card shadow-sm'>";
@@ -187,4 +187,7 @@ foreach ($books as $book){
 
 </script>
 </body>
-</html>
+</html>*/
+$books = $data['books'];
+var_dump($books);
+ ?>

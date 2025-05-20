@@ -2,102 +2,110 @@
 
 abstract class AbstractRepository
 {
-    public function getDbConnection(): PDO
+    protected string $tablename;
+
+    public function Dbcon(): PDO
     {
-        $pdo = new PDO("mysql:host=localhost;dbname=bookstoredb;charset=utf8", "root", "");
-        return $pdo;
+        return new PDO("mysql:host=localhost;dbname=verlag;charset=utf8mb4", 'root', '');
     }
-    abstract public function putElements ($item) : object;
-    public function query($query, array $data): array|bool|int
+
+    public function query($sql, $data = []): array|false
     {
-        $dbcon = $this->getDbConnection();
-        $stmnt = $dbcon->prepare($query);
-        $success = $stmnt->execute($data);
-
-        // wenn DELETE auf Position 0  ist, gibt  execute() zurueck die true oder false zurueck gibt  wenn nicht wird den ein fetchAll() durchgeführt.
-        if (stripos(trim($query), 'DELETE') === 0) {
-            return $success;
-
-        } elseif (stripos(trim($query), 'INSERT') === 0) { // wenn INSERT auf Position 0 ist, gibt  lastInsertId() zurueck die true oder false zurueck gibt  wenn nicht wird den ein fetchAll() durchgeführt.
-            $id = $dbcon->lastInsertId();
-            return $id;
-
+        $dbcon = $this->Dbcon();
+        $stm = $dbcon->prepare($sql);
+        $result = $stm->execute($data);
+        $return = $stm->fetchALL(PDO::FETCH_ASSOC);
+        $id = $dbcon->lastInsertId();
+        if ($id) {
+            $return = ['id' => (int)$id];
         }
-
-        // Sonst wenn es SELECT oder was anders ist, gibt ein Associatives Array zurueck
-        return $stmnt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    public  function findAll() :array | object
-    {
-        $authors = [];
-        $stmnt = "SELECT * FROM ".$this->tableName ;
-
-        $requestStmnt=  $this->query($stmnt , $authors);
-        foreach ($requestStmnt as $item) {
-            $authors[] = $this->putElements($item);
-
-        }
-        return $authors;
-    }
-    public function findById(int $id): object
-    {
-        $stmnt = "SELECT * FROM $this->tableName WHERE id = ?";
-        $authorRequest = $this->query($stmnt, [$id]);
-        $authorRequest = $authorRequest[0];
-        $author = $this->putElements($authorRequest);
-        return $author;
-
-    }
-    public function update(object $classname): object
-    {
-
-
-        $id = $classname->getId();
-        $data = $classname->objectElements($classname);
-        $keys = array_keys($data);
-        $values = array_values($data);
-        $params = implode(', ', array_map(fn($item) => "$item = ?", $keys));
-        $values[]= $id;
-
-
-        $stmnt = 'UPDATE '.$this->tableName.' SET '.$params .'WHERE id=?';
-
-        $this->query($stmnt,$values);
-        return self::findById($id);
-    }
-    public function create(object $classname) : object
-    {
-
-
-        function placeholdersFromArray(array $element): string {
-            return implode(', ', array_fill(0, count($element), '?'));
-        }
-        $data = $classname->objectElements($classname);
-        $keys = array_keys($data);
-        $values = array_values($data);
-        $params = '(' . implode(', ', $keys) . ')';
-        $placeholders = placeholdersFromArray($values);
-
-
-
-
-        $stmnt = "INSERT INTO ".$this->tableName. $params."  VALUES  (".$placeholders.")";
-
-        $id = (int)$this->query($stmnt,$values);
-        var_dump($id);
-        return self::findById($id);
-
-    }
-    public function delete(object $object): bool
-    {
-        $stmnt = "DELETE FROM ". $this->tableName ." WHERE id = ?";
-        $id= (int)$object->getId();
-        if($this->query($stmnt,[$id])){
-            return true;
-        }else{
+        if ($result) {
+            return $return;
+        } else {
             return false;
         }
 
     }
 
+    /**
+     * @return EntityInterface[]
+     */
+    public function findall(): array
+    {
+        $sql = "SELECT * FROM $this->tablename";
+        $return = [];
+        foreach ($this->query($sql) as $item) {
+            $return[] = new $this->tablename(
+                $item);
+        }
+        return $return;
+
+    }
+
+    /**
+     * @param int $id
+     * @return EntityInterface
+     */
+    public function findById(int $id): EntityInterface
+    {
+
+        $sql = "SELECT * FROM $this->tablename where id = :id";
+        $sqldata = [':id' => $id];
+        $data = $this->query($sql, $sqldata)[0];
+        return new $this->tablename($data);
+    }
+
+
+    public function remove(object $obj): bool
+    {
+
+        $sql = "DELETE FROM $this->tablename where id = :id";
+        $data = [':id' => $obj->getId()];
+        $result = $this->query($sql, $data);
+        return ($result === []);
+
+    }
+
+
+    public function update(EntityInterface $obj): EntityInterface
+    {
+        $data = $obj->mapToArray();
+        $keys = array_keys($data);
+        $string = ''; //':fname', ':lname' -> 'fname = :fname, lname = :lname'
+        foreach ($keys as $index => $key) {
+            if ($key === ':id') {
+                continue;
+            }
+            $spalte = str_replace(':', '', $key);
+            $string .= "$spalte = $key, ";
+
+        }
+        $string = rtrim($string, ', ');
+
+        $sql = "UPDATE $this->tablename set $string where id = :id";
+
+        $this->query($sql, $data);
+        return $this->findById($obj->getId());
+    }
+
+    public function create(EntityInterface $entity): EntityInterface
+    {
+        $data = $entity->mapToArray();
+        unset($data[':id']);
+        $keys = array_keys($data);
+        $spalte = '';
+        $placeholder = '';
+        foreach ($keys as $key) {
+            if ($key === ':id') {
+                continue;
+            }
+            $spalte .= str_replace(':', '', $key) . ', ';
+            $placeholder .= "$key, ";
+        }
+        $spalte = rtrim($spalte, ', ');
+        $placeholder = rtrim($placeholder, ', ');
+        $sql = "INSERT INTO $this->tablename ( $spalte ) values ( $placeholder )";
+        $result = $this->query($sql, $data);
+        return $this->findById($result['id']);
+    }
 }
