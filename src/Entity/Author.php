@@ -9,7 +9,6 @@ class Author
     private string $nationality;
     private array $books;
 
-
     function __construct(  string $firstName, string $lastName, string $birthDate, string $nationality, ?int $id=null)
     {
 
@@ -99,13 +98,5 @@ class Author
             "nationality"=>$author->getNationality()];
         return $elements;
     }
-
-
-
-
-
-
-
-
 
 }

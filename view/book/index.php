@@ -63,8 +63,8 @@ foreach ($books as $book){
                 find stories that captivate, educate, and inspire. Whether you're searching for timeless classics or modern favorites,
                 your next great read is just a page away.</p>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-              <a href ="index.php?action=author"> <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Authors</button></a>
-             <a href ="index.php?action=book">   <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Books</button></a>
+              <a href ="/BooksStore/author"> <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Authors</button></a>
+             <a href ="/BooksStore/book">   <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Books</button></a>
             </div>
         </div>
     </div>

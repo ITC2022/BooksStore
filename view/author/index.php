@@ -70,8 +70,8 @@ foreach ($authors as $author){
                 into fiction, history, or self-help, our diverse range of authors has something for everyone.</p>
 
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a href ="index.php?action=author"> <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Authors</button></a>
-                <a href ="index.php?action=book">   <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Books</button></a>
+                <a href ="/BooksStore/author"> <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Authors</button></a>
+                <a href ="/BooksStore/book">   <button type="button" class="btn btn-outline-dark btn-lg px-4 me-sm-3 fw-bold">Books</button></a>
             </div>
         </div>
     </div>

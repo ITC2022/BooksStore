@@ -5,16 +5,24 @@ include "src/Entity/Author.php";
 include "src/Entity/Book.php";
 include "src/Repository/AuthorRepository.php";
 include "src/Repository/BookRepository.php";
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+$path = str_replace('/BooksStore', '', $path);
+var_dump($path);
+$path = trim($path, '/');
+var_dump($path);
+$view = match($path) {
+    "index.php"=>"view/book/index.php",
+    'author' => 'view/author/index.php',
+    'book' => 'view/book/index.php',
+
+};
+
+
+//var_dump($view);
 //$all = Author::findById(1);
 
-//// lädt fehlende Klassen automatisch nach, statt dem user Fehlermeldung anzuzeigen
-//require 'autoload.php';
-//
-//use App\Entity\Author;
-//use App\Repository\AuthorRepository;
-//use App\Entity\Book;
-//use App\Repository\BookRepository;
+
 
 
 
@@ -27,7 +35,7 @@ include "src/Repository/BookRepository.php";
 //$author = new AuthorRepository();
 //$authorId = $author->findById(2);
 //var_dump($authorId);
-$berto = new Book("Barto",'14345',"sdf","2025-01-12",98,'en','verdi','Verdi',92.2,'https',1,2, 18);
+//$berto = new Book("Barto",'14345',"sdf","2025-01-12",98,'en','verdi','Verdi',92.2,'https',1,2, 18);
 $booksen = new BookRepository();
 //$bookse = $books->findById([2]);
 //var_dump($bookse);
@@ -37,14 +45,14 @@ $books = $booksen->findAll();
 //var_dump($books);
 
 
-$action = $_REQUEST['action'] ?? "book";
 
 
 
 
+include $view;
 
 
 
-include "view/".$action."/index.php";
+
 
 

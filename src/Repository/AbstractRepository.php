@@ -7,10 +7,7 @@ abstract class AbstractRepository
         $pdo = new PDO("mysql:host=localhost;dbname=bookstoredb;charset=utf8", "root", "");
         return $pdo;
     }
-
     abstract public function putElements ($item) : object;
-
-
     public function query($query, array $data): array|bool|int
     {
         $dbcon = $this->getDbConnection();
@@ -30,7 +27,6 @@ abstract class AbstractRepository
         // Sonst wenn es SELECT oder was anders ist, gibt ein Associatives Array zurueck
         return $stmnt->fetchAll(PDO::FETCH_ASSOC);
     }
-
     public  function findAll() :array | object
     {
         $authors = [];
@@ -38,24 +34,18 @@ abstract class AbstractRepository
 
         $requestStmnt=  $this->query($stmnt , $authors);
         foreach ($requestStmnt as $item) {
-//            $author =new Author($item['firstName'],$item['lastName'],$item['birthDate'], $item['nationality'],$item['id']);
             $authors[] = $this->putElements($item);
 
         }
         return $authors;
     }
-    public function findById( $id): object
+    public function findById(int $id): object
     {
-
-
-
-
         $stmnt = "SELECT * FROM $this->tableName WHERE id = ?";
         $authorRequest = $this->query($stmnt, [$id]);
         $authorRequest = $authorRequest[0];
         $author = $this->putElements($authorRequest);
         return $author;
-
 
     }
     public function update(object $classname): object
@@ -109,20 +99,5 @@ abstract class AbstractRepository
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
