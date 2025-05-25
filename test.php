@@ -83,5 +83,8 @@ foreach ($isbnList as $isbn) {
     ]);
 }
 
+
+
+
 echo "Import abgeschlossen!";
 

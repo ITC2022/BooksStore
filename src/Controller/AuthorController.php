@@ -28,9 +28,15 @@ class AuthorController extends AbstractController
     {
         $authors = new AuthorRepository();
         $author = $authors->findAll();
-        include "src/view/author/index.php";
+        $loader = new \Twig\Loader\FilesystemLoader("src/view/author/");
+        $twig = new \Twig\Environment($loader);
 
-        return $author;
+        echo $twig->render('index.html.twig',["authors" => $author]);
+
+
+//        include "src/view/author/index.php";
+
+//        return $author;
 
 
     }

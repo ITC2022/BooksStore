@@ -1,5 +1,12 @@
 <?php
 
+
+
+
+require_once 'vendor/autoload.php';
+
+
+
 spl_autoload_register(function($classname){
     $ordner = ["Entity","Repository","Controller"];
     foreach($ordner as $od){
