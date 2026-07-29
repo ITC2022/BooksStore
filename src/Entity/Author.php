@@ -1,61 +1,30 @@
 <?php
-//namespace App\Entity;
-class Author implements EntityInterface
+
+declare(strict_types=1);
+
+namespace App\Entity;
+
+use App\Repository\BookRepository;
+use DateTimeImmutable;
+
+final class Author implements EntityInterface
 {
     private ?int $id;
-    private string $fname;
-    private string $lname;
-    private DateTime $bday;
-    private string $country;
+    private string $firstName;
+    private string $lastName;
+    private ?DateTimeImmutable $birthDate;
+    private ?string $nationality;
 
-    private array $books;
+    /** @var Book[]|null lazily loaded on first call to getBooks() */
+    private ?array $books = null;
 
-    /**
-     * @param DateTime $bday
-     * @param string $country
-     * @param string $fname
-     * @param int|null $id
-     * @param string $lname
-     */
     public function __construct(array $data)
     {
-        $this->bday = new DateTime($data['bday']);
-        $this->country = $data['country'];
-        $this->fname = $data['fname'];
-        $this->id = $data['id'] ?? null;
-        $this->lname = $data['lname'];
-        $bookrepo = new BookRepository();
-        $this->books = $bookrepo->findByAuthor($this);
-    }
-
-    public function getBday(): DateTime
-    {
-        return $this->bday;
-    }
-
-    public function setBday(DateTime $bday): void
-    {
-        $this->bday = $bday;
-    }
-
-    public function getCountry(): string
-    {
-        return $this->country;
-    }
-
-    public function setCountry(string $country): void
-    {
-        $this->country = $country;
-    }
-
-    public function getFname(): string
-    {
-        return $this->fname;
-    }
-
-    public function setFname(string $fname): void
-    {
-        $this->fname = $fname;
+        $this->id = isset($data['id']) ? (int) $data['id'] : null;
+        $this->firstName = $data['first_name'];
+        $this->lastName = $data['last_name'];
+        $this->birthDate = !empty($data['birth_date']) ? new DateTimeImmutable($data['birth_date']) : null;
+        $this->nationality = $data['nationality'] ?? null;
     }
 
     public function getId(): ?int
@@ -63,32 +32,73 @@ class Author implements EntityInterface
         return $this->id;
     }
 
-
-    public function getLname(): string
+    public function getFirstName(): string
     {
-        return $this->lname;
+        return $this->firstName;
     }
 
-    public function setLname(string $lname): void
+    public function setFirstName(string $firstName): void
     {
-        $this->lname = $lname;
+        $this->firstName = $firstName;
     }
 
+    public function getLastName(): string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): void
+    {
+        $this->lastName = $lastName;
+    }
+
+    public function getFullName(): string
+    {
+        return trim("{$this->firstName} {$this->lastName}");
+    }
+
+    public function getBirthDate(): ?DateTimeImmutable
+    {
+        return $this->birthDate;
+    }
+
+    public function setBirthDate(?DateTimeImmutable $birthDate): void
+    {
+        $this->birthDate = $birthDate;
+    }
+
+    public function getNationality(): ?string
+    {
+        return $this->nationality;
+    }
+
+    public function setNationality(?string $nationality): void
+    {
+        $this->nationality = $nationality;
+    }
+
+    /**
+     * @return Book[]
+     */
     public function getBooks(): array
     {
+        if ($this->books === null) {
+            $this->books = $this->id !== null
+                ? (new BookRepository())->findByAuthorId($this->id)
+                : [];
+        }
+
         return $this->books;
     }
 
-    public function setBooks(array $books): void
+    public function mapToArray(): array
     {
-        $this->books = $books;
+        return [
+            ':first_name' => $this->firstName,
+            ':last_name' => $this->lastName,
+            ':birth_date' => $this->birthDate?->format('Y-m-d'),
+            ':nationality' => $this->nationality,
+            ':id' => $this->id,
+        ];
     }
-
-
-    public function mapToArray():array
-    {
-        return [':fname'=> $this->getFname(),':lname'=>$this->getLname(),':bday'=>$this->getBday()->format('Y-m-d'),':country'=>$this->getCountry(),':id'=>$this->getId()];
-
-    }
-
 }

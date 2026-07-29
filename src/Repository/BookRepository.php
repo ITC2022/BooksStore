@@ -1,29 +1,33 @@
 <?php
-//namespace App\Repository;
-class BookRepository extends AbstractRepository
-{
 
-    protected string $tablename = 'Book';
+declare(strict_types=1);
+
+namespace App\Repository;
+
+use App\Entity\Book;
+use App\Entity\EntityInterface;
+use PDO;
+
+final class BookRepository extends AbstractRepository
+{
+    protected string $table = 'books';
 
     /**
-     * @param Author $author
      * @return Book[]
      */
-    public function findByAuthor(Author $author): array
+    public function findByAuthorId(int $authorId): array
     {
-        $id = $author->getId();
-        $dbcon = $this->Dbcon();
-        $sql = 'SELECT * FROM book where author_id = :author_id';
-        $stm = $dbcon->prepare($sql);
-        $stm->bindParam(':author_id', $id);
-        $stm->execute();
-        $data = $stm->fetchAll(PDO::FETCH_ASSOC);
-        $return = [];
-        foreach ($data as $item) {
-            $return[] = $item['id'];
-        }
+        $statement = $this->pdo->prepare("SELECT * FROM {$this->table} WHERE author_id = :author_id ORDER BY title");
+        $statement->execute([':author_id' => $authorId]);
 
-        return $return;
+        return array_map(
+            fn (array $row): Book => new Book($row),
+            $statement->fetchAll(PDO::FETCH_ASSOC)
+        );
+    }
 
+    protected function hydrate(array $row): EntityInterface
+    {
+        return new Book($row);
     }
 }

@@ -1,111 +1,92 @@
 <?php
 
+declare(strict_types=1);
+
+namespace App\Repository;
+
+use App\Database;
+use App\Entity\EntityInterface;
+use PDO;
+
 abstract class AbstractRepository
 {
-    protected string $tablename;
+    protected PDO $pdo;
+    protected string $table;
 
-    public function Dbcon(): PDO
+    public function __construct(?PDO $pdo = null)
     {
-        return new PDO("mysql:host=localhost;dbname=verlag;charset=utf8mb4", 'root', '');
-    }
-
-    public function query($sql, $data = []): array|false
-    {
-        $dbcon = $this->Dbcon();
-        $stm = $dbcon->prepare($sql);
-        $result = $stm->execute($data);
-        $return = $stm->fetchALL(PDO::FETCH_ASSOC);
-        $id = $dbcon->lastInsertId();
-        if ($id) {
-            $return = ['id' => (int)$id];
-        }
-        if ($result) {
-            return $return;
-        } else {
-            return false;
-        }
-
+        $this->pdo = $pdo ?? Database::connection();
     }
 
     /**
      * @return EntityInterface[]
      */
-    public function findall(): array
+    public function findAll(): array
     {
-        $sql = "SELECT * FROM $this->tablename";
-        $return = [];
-        foreach ($this->query($sql) as $item) {
-            $return[] = new $this->tablename(
-                $item);
-        }
-        return $return;
+        $statement = $this->pdo->query("SELECT * FROM {$this->table} ORDER BY id");
 
+        return array_map(
+            fn (array $row): EntityInterface => $this->hydrate($row),
+            $statement->fetchAll(PDO::FETCH_ASSOC)
+        );
     }
 
-    /**
-     * @param int $id
-     * @return EntityInterface
-     */
-    public function findById(int $id): EntityInterface
+    public function findById(int $id): ?EntityInterface
     {
+        $statement = $this->pdo->prepare("SELECT * FROM {$this->table} WHERE id = :id");
+        $statement->execute([':id' => $id]);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
 
-        $sql = "SELECT * FROM $this->tablename where id = :id";
-        $sqldata = [':id' => $id];
-        $data = $this->query($sql, $sqldata)[0];
-        return new $this->tablename($data);
-    }
-
-
-    public function remove(object $obj): bool
-    {
-
-        $sql = "DELETE FROM $this->tablename where id = :id";
-        $data = [':id' => $obj->getId()];
-        $result = $this->query($sql, $data);
-        return ($result === []);
-
-    }
-
-
-    public function update(EntityInterface $obj): EntityInterface
-    {
-        $data = $obj->mapToArray();
-        $keys = array_keys($data);
-        $string = ''; //':fname', ':lname' -> 'fname = :fname, lname = :lname'
-        foreach ($keys as $index => $key) {
-            if ($key === ':id') {
-                continue;
-            }
-            $spalte = str_replace(':', '', $key);
-            $string .= "$spalte = $key, ";
-
-        }
-        $string = rtrim($string, ', ');
-
-        $sql = "UPDATE $this->tablename set $string where id = :id";
-
-        $this->query($sql, $data);
-        return $this->findById($obj->getId());
+        return $row === false ? null : $this->hydrate($row);
     }
 
     public function create(EntityInterface $entity): EntityInterface
     {
         $data = $entity->mapToArray();
         unset($data[':id']);
-        $keys = array_keys($data);
-        $spalte = '';
-        $placeholder = '';
-        foreach ($keys as $key) {
+
+        $columns = array_map(static fn (string $key): string => ltrim($key, ':'), array_keys($data));
+        $placeholders = array_keys($data);
+
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $this->table,
+            implode(', ', $columns),
+            implode(', ', $placeholders)
+        );
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($data);
+
+        return $this->findById((int) $this->pdo->lastInsertId());
+    }
+
+    public function update(EntityInterface $entity): EntityInterface
+    {
+        $data = $entity->mapToArray();
+
+        $assignments = [];
+        foreach (array_keys($data) as $key) {
             if ($key === ':id') {
                 continue;
             }
-            $spalte .= str_replace(':', '', $key) . ', ';
-            $placeholder .= "$key, ";
+            $assignments[] = ltrim($key, ':') . ' = ' . $key;
         }
-        $spalte = rtrim($spalte, ', ');
-        $placeholder = rtrim($placeholder, ', ');
-        $sql = "INSERT INTO $this->tablename ( $spalte ) values ( $placeholder )";
-        $result = $this->query($sql, $data);
-        return $this->findById($result['id']);
+
+        $sql = sprintf('UPDATE %s SET %s WHERE id = :id', $this->table, implode(', ', $assignments));
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($data);
+
+        return $this->findById($entity->getId());
     }
+
+    public function remove(EntityInterface $entity): bool
+    {
+        $statement = $this->pdo->prepare("DELETE FROM {$this->table} WHERE id = :id");
+
+        return $statement->execute([':id' => $entity->getId()]);
+    }
+
+    abstract protected function hydrate(array $row): EntityInterface;
 }

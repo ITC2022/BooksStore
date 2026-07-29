@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\Author;
 use App\Entity\EntityInterface;
+use App\Entity\User;
 
-final class AuthorRepository extends AbstractRepository
+final class UserRepository extends AbstractRepository
 {
-    protected string $table = 'authors';
+    protected string $table = 'users';
 
     protected function hydrate(array $row): EntityInterface
     {
-        return new Author($row);
+        return new User($row);
     }
 }
