@@ -1,43 +1,33 @@
 <?php
-//namespace App\Repository;
-include_once "AbstractRepository.php";
 
-class BookRepository extends AbstractRepository
+declare(strict_types=1);
+
+namespace App\Repository;
+
+use App\Entity\Book;
+use App\Entity\EntityInterface;
+use PDO;
+
+final class BookRepository extends AbstractRepository
 {
+    protected string $table = 'books';
 
-    protected string $tableName;
-
-    public function __construct()
+    /**
+     * @return Book[]
+     */
+    public function findByAuthorId(int $authorId): array
     {
-        $this->tableName = str_replace("repository", "", strtolower(BookRepository::class)."s");
+        $statement = $this->pdo->prepare("SELECT * FROM {$this->table} WHERE author_id = :author_id ORDER BY title");
+        $statement->execute([':author_id' => $authorId]);
+
+        return array_map(
+            fn (array $row): Book => new Book($row),
+            $statement->fetchAll(PDO::FETCH_ASSOC)
+        );
     }
 
-
-    public function putElements($item): object
+    protected function hydrate(array $row): EntityInterface
     {
-        $book =new Book($item['title'],$item['isbn'],$item['description'],$item['publicationDate'], $item['pageCount'],$item['language'],$item['publisher'],$item['category'],$item['price'],$item['coverUrl'],$item['binding'],$item['authorId'],$item['id']);
-        return $book;
+        return new Book($row);
     }
-
-
-    public function getAuthor(Author $author) : array
-    {
-        $books =[];
-        $stmnt = "SELECT * FROM books WHERE authorId = ? ";
-        $id = $author->getId();
-        $requeststmnt = $this->query($stmnt,[$id] );
-        foreach ($requeststmnt as $item) {
-            $books[] = (int)$item["id"];
-
-        }
-        return $books;
-    }
-
-
-
-
-
-
-
-
 }

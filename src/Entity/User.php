@@ -1,19 +1,18 @@
 <?php
 
-class User
+declare(strict_types=1);
+
+namespace App\Entity;
+
+final class User implements EntityInterface
 {
-
     private ?int $id;
-    private string $userName;
+    private string $username;
 
-    /**
-     * @param int $id
-     * @param string $userName
-     */
-    public function __construct( string $userName, ?int $id= Null)
+    public function __construct(array $data)
     {
-        $this->id = $id;
-        $this->userName = $userName;
+        $this->id = isset($data['id']) ? (int) $data['id'] : null;
+        $this->username = $data['username'];
     }
 
     public function getId(): ?int
@@ -21,26 +20,21 @@ class User
         return $this->id;
     }
 
-    public function setId(?int $id): void
+    public function getUsername(): string
     {
-        $this->id = $id;
+        return $this->username;
     }
 
-    public function getUserName(): string
+    public function setUsername(string $username): void
     {
-        return $this->userName;
+        $this->username = $username;
     }
 
-    public function setUserName(string $userName): void
+    public function mapToArray(): array
     {
-        $this->userName = $userName;
+        return [
+            ':username' => $this->username,
+            ':id' => $this->id,
+        ];
     }
-
-    public function objectElements(object $book) : array{
-        $elements = ["userName"=>$this->getUserName()];
-        return $elements;
-
-    }
-
-
 }

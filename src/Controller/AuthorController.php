@@ -1,121 +1,108 @@
 <?php
 
-//include "AbstractController.php";
+declare(strict_types=1);
 
-class AuthorController extends AbstractController
+namespace App\Controller;
+
+use App\Entity\Author;
+use App\Repository\AuthorRepository;
+use App\View;
+
+final class AuthorController
 {
-    private AuthorRepository $autors;
-    public function show(int $id) : array
+    private AuthorRepository $authors;
+
+    public function __construct()
     {
-
-        $author = new AuthorRepository();
-        $author = $author->findById($id);
-        if(!$author){
-            http_response_code(400);
-            include "error.php";
-            exit;
-        }
-
-        include "src/view/author/show.php";
-
-
-        return [$author];
-
+        $this->authors = new AuthorRepository();
     }
 
-
-    public function index()
+    public function index(): void
     {
-        $authors = new AuthorRepository();
-        $author = $authors->findAll();
-        include "src/view/author/index.php";
-
-        return $author;
-
-
+        View::render('author/index', ['authors' => $this->authors->findAll()]);
     }
-    public function remove(int $id) : void
-    {
-        $authors = new AuthorRepository();
-        $author = $authors->findById($id);
 
-        if (!$author) {
-            echo "Autore non trovato.";
+    public function show(int $id): void
+    {
+        $author = $this->authors->findById($id);
+
+        if ($author === null) {
+            $this->notFound();
             return;
         }
 
-        $authors->delete($author);
+        View::render('author/show', ['author' => $author]);
+    }
 
-        // Redirect dopo delete
-        header("Location: /BooksStore/author/index");
+    public function create(): void
+    {
+        View::render('author/form', ['author' => null, 'action' => '/authors']);
+    }
+
+    public function store(): void
+    {
+        $author = new Author($this->fromRequest());
+        $created = $this->authors->create($author);
+
+        $this->redirect('/authors/' . $created->getId());
+    }
+
+    public function edit(int $id): void
+    {
+        $author = $this->authors->findById($id);
+
+        if ($author === null) {
+            $this->notFound();
+            return;
+        }
+
+        View::render('author/form', ['author' => $author, 'action' => '/authors/' . $id]);
+    }
+
+    public function update(int $id): void
+    {
+        $data = $this->fromRequest();
+        $data['id'] = $id;
+
+        $this->authors->update(new Author($data));
+
+        $this->redirect('/authors/' . $id);
+    }
+
+    public function destroy(int $id): void
+    {
+        $author = $this->authors->findById($id);
+
+        if ($author !== null) {
+            $this->authors->remove($author);
+        }
+
+        $this->redirect('/authors');
+    }
+
+    private function fromRequest(): array
+    {
+        $post = static fn (string $key): ?string => trim((string) ($_POST[$key] ?? '')) !== ''
+            ? trim((string) $_POST[$key])
+            : null;
+
+        return [
+            'first_name' => $post('first_name') ?? '',
+            'last_name' => $post('last_name') ?? '',
+            'birth_date' => $post('birth_date'),
+            'nationality' => $post('nationality'),
+        ];
+    }
+
+    private function redirect(string $path): void
+    {
+        header('Location: ' . $path);
         exit;
     }
 
-
-
-
-    public function edit($id)
+    private function notFound(): void
     {
-
-
-
-
-
-        $authorRepo = new AuthorRepository();
-        $author = $authorRepo->findById($id);
-        if (!$author) {
-            header("Location: /BooksStore/error.php");
-            exit;
-        }
-
-        if($_SERVER['REQUEST_METHOD']==="POST"){
-            $author->setFirstName($_POST['firstName']);
-            $author->setLastName($_POST['lastName']);
-            $author->setBirthDate(new DateTime($_POST['birthDate']));
-            $author->setNationality($_POST['nationality']);
-            $authorRepo->update($author);
-            header("Location: /BooksStore/author/index");
-            exit;
-
-        }$author = $authorRepo->findById($id);
-        header("Location: /BooksStore/author/index");
-        return $author;
-        
-        
+        http_response_code(404);
+        View::render('errors/404');
     }
-
-    public function new(): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            include 'src/view/author/create.php';
-            return;
-        }
-
-        // Method POST -> Erstellt ein Author
-        $firstName = $_POST['firstName'] ?? '';
-        $lastName = $_POST['lastName'] ?? '';
-        $birthDate = $_POST['birthDate'] ?? '';
-        $nationality = $_POST['nationality'] ?? '';
-
-        // Validierung von Usereingaben
-        if (empty($firstName) || empty($lastName) || empty($birthDate) || empty($nationality)) {
-            echo "Alle felder sind erfordelich.";
-            return;
-        }
-
-        // Creazione dell'oggetto Author
-        $author = new Author($firstName, $lastName, $birthDate, $nationality);
-
-        // Inserimento nel DB
-        $authorRepo = new AuthorRepository();
-        $authorRepo->create($author);
-
-        // Reindirizza alla lista
-        header("Location: /BooksStore/author/index");
-        exit;
-    }
-
-
-
-
 }

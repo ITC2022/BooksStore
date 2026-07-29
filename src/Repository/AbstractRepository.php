@@ -1,118 +1,92 @@
 <?php
 
+declare(strict_types=1);
+
+namespace App\Repository;
+
+use App\Database;
+use App\Entity\EntityInterface;
+use PDO;
+
 abstract class AbstractRepository
 {
-    public function getDbConnection(): PDO
+    protected PDO $pdo;
+    protected string $table;
+
+    public function __construct(?PDO $pdo = null)
     {
-        $pdo = new PDO("mysql:host=localhost;dbname=bookstoredb;charset=utf8", "root", "");
-        return $pdo;
+        $this->pdo = $pdo ?? Database::connection();
     }
-    abstract public function putElements ($item) : object;
-    public function query($query, array $data): array|bool|int
+
+    /**
+     * @return EntityInterface[]
+     */
+    public function findAll(): array
     {
-        $dbcon = $this->getDbConnection();
-        $stmnt = $dbcon->prepare($query);
-        $success = $stmnt->execute($data);
+        $statement = $this->pdo->query("SELECT * FROM {$this->table} ORDER BY id");
 
-        // wenn DELETE auf Position 0  ist, gibt  execute() zurueck die true oder false zurueck gibt  wenn nicht wird den ein fetchAll() durchgeführt.
-        if (stripos(trim($query), 'DELETE') === 0) {
-            return $success;
+        return array_map(
+            fn (array $row): EntityInterface => $this->hydrate($row),
+            $statement->fetchAll(PDO::FETCH_ASSOC)
+        );
+    }
 
-        } elseif (stripos(trim($query), 'INSERT') === 0) { // wenn INSERT auf Position 0 ist, gibt  lastInsertId() zurueck die true oder false zurueck gibt  wenn nicht wird den ein fetchAll() durchgeführt.
-            $id = $dbcon->lastInsertId();
-            return $id;
+    public function findById(int $id): ?EntityInterface
+    {
+        $statement = $this->pdo->prepare("SELECT * FROM {$this->table} WHERE id = :id");
+        $statement->execute([':id' => $id]);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
 
+        return $row === false ? null : $this->hydrate($row);
+    }
+
+    public function create(EntityInterface $entity): EntityInterface
+    {
+        $data = $entity->mapToArray();
+        unset($data[':id']);
+
+        $columns = array_map(static fn (string $key): string => ltrim($key, ':'), array_keys($data));
+        $placeholders = array_keys($data);
+
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $this->table,
+            implode(', ', $columns),
+            implode(', ', $placeholders)
+        );
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($data);
+
+        return $this->findById((int) $this->pdo->lastInsertId());
+    }
+
+    public function update(EntityInterface $entity): EntityInterface
+    {
+        $data = $entity->mapToArray();
+
+        $assignments = [];
+        foreach (array_keys($data) as $key) {
+            if ($key === ':id') {
+                continue;
+            }
+            $assignments[] = ltrim($key, ':') . ' = ' . $key;
         }
 
-        // Sonst wenn es SELECT oder was anders ist, gibt ein Associatives Array zurueck
-        return $stmnt->fetchAll(PDO::FETCH_ASSOC);
+        $sql = sprintf('UPDATE %s SET %s WHERE id = :id', $this->table, implode(', ', $assignments));
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($data);
+
+        return $this->findById($entity->getId());
     }
-    public  function findAll() :array | object
+
+    public function remove(EntityInterface $entity): bool
     {
-        $authors = [];
-        $stmnt = "SELECT * FROM ".$this->tableName ;
+        $statement = $this->pdo->prepare("DELETE FROM {$this->table} WHERE id = :id");
 
-        $requestStmnt=  $this->query($stmnt , $authors);
-        foreach ($requestStmnt as $item) {
-            $authors[] = $this->putElements($item);
-
-        }
-        return $authors;
-    }
-    public function findById(int $id): object |null
-    {
-        $stmnt = "SELECT * FROM $this->tableName WHERE id = ?";
-        $authorRequest = $this->query($stmnt, [$id]);
-
-        if(empty($authorRequest)){
-            return null;
-        }
-        $authorRequest = $authorRequest[0];
-        $author = $this->putElements($authorRequest);
-        return $author;
-
-    }
-    public function update(object $classname): object
-    {
-
-
-        $id = $classname->getId();
-        $data = $classname->objectElements($classname);
-        $keys = array_keys($data);
-        $values = array_values($data);
-        $params = implode(', ', array_map(fn($item) => "$item = ?", $keys));
-        $values[]= $id;
-
-
-        $stmnt = 'UPDATE '.$this->tableName.' SET '.$params .'WHERE id=?';
-
-        $rowsAffected = $this->query($stmnt,$values);
-        if ($rowsAffected === 0) {
-            header('Location: /error.php');
-            exit;
-        }
-
-        $updateObjekt = self::findById($id);
-        if (!$updateObjekt) {
-            header('Location: /error.php');
-            exit;
-        }return $updateObjekt;
-
-
-    }
-    public function create(object $classname) : object
-    {
-
-
-        function placeholdersFromArray(array $element): string {
-            return implode(', ', array_fill(0, count($element), '?'));
-        }
-        $data = $classname->objectElements($classname);
-        $keys = array_keys($data);
-        $values = array_values($data);
-        $params = '(' . implode(', ', $keys) . ')';
-        $placeholders = placeholdersFromArray($values);
-
-
-
-
-        $stmnt = "INSERT INTO ".$this->tableName. $params."  VALUES  (".$placeholders.")";
-
-        $id = (int)$this->query($stmnt,$values);
-        var_dump($id);
-        return self::findById($id);
-
-    }
-    public function delete(object $object): bool
-    {
-        $stmnt = "DELETE FROM ". $this->tableName ." WHERE id = ?";
-        $id= (int)$object->getId();
-        if($this->query($stmnt,[$id])){
-            return true;
-        }else{
-            return false;
-        }
-
+        return $statement->execute([':id' => $entity->getId()]);
     }
 
+    abstract protected function hydrate(array $row): EntityInterface;
 }

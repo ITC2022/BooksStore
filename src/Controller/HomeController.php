@@ -1,11 +1,15 @@
 <?php
 
-class HomeController
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\View;
+
+final class HomeController
 {
-
-    public function index()
+    public function index(): void
     {
-        include "src/view/home/home.php";
+        View::render('home');
     }
-
 }

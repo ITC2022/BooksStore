@@ -1,41 +1,33 @@
 <?php
-//namespace App\Entity;
-class Author
+
+declare(strict_types=1);
+
+namespace App\Entity;
+
+use App\Repository\BookRepository;
+use DateTimeImmutable;
+
+final class Author implements EntityInterface
 {
-    private int $id;
+    private ?int $id;
     private string $firstName;
     private string $lastName;
-    private DateTime $birthDate;
-    private string $nationality;
-    private array $books;
+    private ?DateTimeImmutable $birthDate;
+    private ?string $nationality;
 
-    function __construct(  string $firstName, string $lastName, string $birthDate, string $nationality, ?int $id=null)
+    /** @var Book[]|null lazily loaded on first call to getBooks() */
+    private ?array $books = null;
+
+    public function __construct(array $data)
     {
-
-        if($id !== NULL){
-            $this->id = $id;
-
-            $bookrepo = new BookRepository();
-            $this->books = $bookrepo->getAuthor($this);
-        }else{
-            $this->books = [];
-        }
-
-        $this->firstName = $firstName;
-        $this->lastName = $lastName;
-        $this->birthDate = new DateTime($birthDate);
-        $this->nationality= $nationality;
-
-
-
-
-
-
+        $this->id = isset($data['id']) ? (int) $data['id'] : null;
+        $this->firstName = $data['first_name'];
+        $this->lastName = $data['last_name'];
+        $this->birthDate = !empty($data['birth_date']) ? new DateTimeImmutable($data['birth_date']) : null;
+        $this->nationality = $data['nationality'] ?? null;
     }
 
-
-
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -60,43 +52,53 @@ class Author
         $this->lastName = $lastName;
     }
 
-    public function getBirthDate(): DateTime
+    public function getFullName(): string
+    {
+        return trim("{$this->firstName} {$this->lastName}");
+    }
+
+    public function getBirthDate(): ?DateTimeImmutable
     {
         return $this->birthDate;
     }
 
-    public function setBirthDate(DateTime $birthDate): void
+    public function setBirthDate(?DateTimeImmutable $birthDate): void
     {
         $this->birthDate = $birthDate;
     }
 
-    public function getNationality(): string
+    public function getNationality(): ?string
     {
         return $this->nationality;
     }
 
-    public function setNationality(string $nationality): void
+    public function setNationality(?string $nationality): void
     {
         $this->nationality = $nationality;
     }
 
+    /**
+     * @return Book[]
+     */
     public function getBooks(): array
     {
+        if ($this->books === null) {
+            $this->books = $this->id !== null
+                ? (new BookRepository())->findByAuthorId($this->id)
+                : [];
+        }
+
         return $this->books;
     }
 
-    public function setBooks(array $books): void
+    public function mapToArray(): array
     {
-        $this->books = $books;
+        return [
+            ':first_name' => $this->firstName,
+            ':last_name' => $this->lastName,
+            ':birth_date' => $this->birthDate?->format('Y-m-d'),
+            ':nationality' => $this->nationality,
+            ':id' => $this->id,
+        ];
     }
-
-    public function objectElements(object $author) : array
-    {
-        $elements= ["firstname"=>$author->getFirstName(),
-            "lastname"=>$author->getLastName(),
-            "birthDate"=>$author->getBirthDate()->format("Y-m-d"),
-            "nationality"=>$author->getNationality()];
-        return $elements;
-    }
-
 }

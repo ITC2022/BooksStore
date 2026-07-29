@@ -1,20 +1,18 @@
 <?php
 
-include_once "AbstractRepository.php";
-class AuthorRepository extends AbstractRepository
+declare(strict_types=1);
+
+namespace App\Repository;
+
+use App\Entity\Author;
+use App\Entity\EntityInterface;
+
+final class AuthorRepository extends AbstractRepository
 {
+    protected string $table = 'authors';
 
-    protected string $tableName;
-
-    public function __construct()
+    protected function hydrate(array $row): EntityInterface
     {
-        $this->tableName = str_replace("repository", "", strtolower(AuthorRepository::class)."s");
+        return new Author($row);
     }
-
-    public function putElements($item) : Author
-    {
-        $author = new Author($item['firstName'],$item['lastName'],$item['birthDate'], $item['nationality'],$item['id']);
-        return $author;
-    }
-
 }

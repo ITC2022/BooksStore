@@ -1,144 +1,127 @@
 <?php
 
-class BookController extends AbstractController
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\Entity\Book;
+use App\Repository\AuthorRepository;
+use App\Repository\BookRepository;
+use App\View;
+
+final class BookController
 {
+    private BookRepository $books;
+    private AuthorRepository $authors;
 
-    public function show(int $id) : array
+    public function __construct()
     {
-
-
-
-        $books = new BookRepository();
-        $book = $books->findById($id);
-        if(!$book){
-            http_response_code(400);
-            include "error.php";
-            exit;
-        }
-        include "src/view/book/show.php";
-
-
-        return [$book];
-
+        $this->books = new BookRepository();
+        $this->authors = new AuthorRepository();
     }
 
-
-    function new(): void
+    public function index(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            include 'src/view/book/create.php';
+        View::render('book/index', ['books' => $this->books->findAll()]);
+    }
+
+    public function show(int $id): void
+    {
+        $book = $this->books->findById($id);
+
+        if ($book === null) {
+            $this->notFound();
             return;
         }
 
-        // Method POST -> Erstellt ein Author
-        $title = $_POST['title'] ?? '';
-        $isbn = $_POST['isbn'] ?? '';
-        $description = $_POST['description'] ?? '';
-        $publicationDate = $_POST['publicationDate'] ?? '';
-        $pageCount = $_POST['pageCount'] ?? '';
-        $language = $_POST['language'] ?? '';
-        $publisher = $_POST['publisher'] ?? '';
-        $category = $_POST['category'] ?? '';
-        $price = $_POST['price'] ?? '';
-        $coverUrl = $_POST['coverUrl'] ?? '';
-        $binding = $_POST['binding'] ?? '';
-        $authorId = $_POST['authorId'] ?? '';
+        View::render('book/show', ['book' => $book]);
+    }
 
-        // Validierung von Usereingaben
-        if (
-            empty($title) || empty($isbn) || empty($description) || empty($publicationDate) ||
-            empty($pageCount) || empty($language) || empty($publisher) || empty($category) ||
-            empty($price) || empty($coverUrl) || empty($binding) || empty($authorId)
-        ) {
-            echo "Alle felder sind erfordelich.";
+    public function create(): void
+    {
+        View::render('book/form', [
+            'book' => null,
+            'authors' => $this->authors->findAll(),
+            'action' => '/books',
+        ]);
+    }
+
+    public function store(): void
+    {
+        $book = new Book($this->fromRequest());
+        $created = $this->books->create($book);
+
+        $this->redirect('/books/' . $created->getId());
+    }
+
+    public function edit(int $id): void
+    {
+        $book = $this->books->findById($id);
+
+        if ($book === null) {
+            $this->notFound();
             return;
         }
 
-        // Creazione dell'oggetto Author
-        $book = new Book(
-            $title,
-            $isbn,
-            $description,
-            $publicationDate,
-            $pageCount,
-            $language,
-            $publisher,
-            $category,
-            $price,
-            $coverUrl,
-            $binding,
-            $authorId
-        );
-
-        // Inserimento nel DB
-        $bookRepo = new BookRepository();
-        $bookRepo->create($book);
-
-        // Reindirizza alla lista
-        header("Location: /BooksStore/book/index");
-        exit;
-
-
-
+        View::render('book/form', [
+            'book' => $book,
+            'authors' => $this->authors->findAll(),
+            'action' => '/books/' . $id,
+        ]);
     }
 
-
-        public function edit($id): void
+    public function update(int $id): void
     {
-        $bookRepo = new BookRepository();
-        $book = $bookRepo->findById($id);
+        $data = $this->fromRequest();
+        $data['id'] = $id;
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $book->setTitle($_POST['title']);
-            $book->setIsbn($_POST['isbn']);
-            $book->setDescription($_POST['description']);
-            $book->setPublicationDate(new DateTime($_POST['publicationDate']));
-            $book->setPageCount((int)$_POST['pageCount']);
-            $book->setLanguage($_POST['language']);
-            $book->setPublisher($_POST['publisher']);
-            $book->setCategory($_POST['category']);
-            $book->setPrice((float)$_POST['price']);
-            $book->setCoverUrl($_POST['coverUrl']);
-            $book->setBinding(isset($_POST['binding']) ? (bool)$_POST['binding'] : false);
-            $book->setAuthorId((int)$_POST['authorId']);
+        $this->books->update(new Book($data));
 
-            $bookRepo->update($book);
+        $this->redirect('/books/' . $id);
+    }
 
-            header("Location: /BooksStore/book/index");
-            exit;
+    public function destroy(int $id): void
+    {
+        $book = $this->books->findById($id);
+
+        if ($book !== null) {
+            $this->books->remove($book);
         }
 
-//        // Se GET mostra il form di modifica con $book
-//        include 'src/view/book/edit.php';
+        $this->redirect('/books');
     }
 
-
-    function index()
+    private function fromRequest(): array
     {
-        $books = new BookRepository();
-        $book = $books->findAll();
-        include "src/view/book/index.php";
+        $post = static fn (string $key): ?string => trim((string) ($_POST[$key] ?? '')) !== ''
+            ? trim((string) $_POST[$key])
+            : null;
 
-        return $book;
+        return [
+            'title' => $post('title') ?? '',
+            'isbn' => $post('isbn') ?? '',
+            'description' => $post('description'),
+            'publication_date' => $post('publication_date'),
+            'pages' => $post('pages'),
+            'language' => $post('language'),
+            'publisher' => $post('publisher'),
+            'category' => $post('category'),
+            'price' => $post('price') ?? 0,
+            'cover_url' => $post('cover_url'),
+            'hardcover' => isset($_POST['hardcover']) ? 1 : 0,
+            'author_id' => $post('author_id'),
+        ];
     }
 
-    function remove(int $id): void
+    private function redirect(string $path): void
     {
-        $books= new BookRepository();
-        $book = $books->findById($id);
-
-        if (!$book) {
-            echo "Autore non trovato.";
-            return;
-        }
-
-        $books->delete($book);
-
-        // Redirect dopo delete
-        header("Location: /BooksStore/book/index");
+        header('Location: ' . $path);
         exit;
     }
 
-
-
+    private function notFound(): void
+    {
+        http_response_code(404);
+        View::render('errors/404');
+    }
 }

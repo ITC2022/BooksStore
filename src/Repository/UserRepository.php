@@ -1,17 +1,18 @@
 <?php
-include_once "AbstractRepository.php";
-class UserRepository extends AbstractRepository
+
+declare(strict_types=1);
+
+namespace App\Repository;
+
+use App\Entity\EntityInterface;
+use App\Entity\User;
+
+final class UserRepository extends AbstractRepository
 {
-    protected string $tableName;
-    public function __construct()
-    {
-        $this->tableName = str_replace("repository", "", strtolower(UserRepository::class)."s");
-    }
+    protected string $table = 'users';
 
-
-    public function putElements($item): object
+    protected function hydrate(array $row): EntityInterface
     {
-        $author = new User($item['userName'],$item['id']);
-        return $author;
+        return new User($row);
     }
 }
