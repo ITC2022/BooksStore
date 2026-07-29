@@ -103,6 +103,10 @@ throwaway SQLite in-memory connection created per test.
 - **Repository pattern**: `AbstractRepository` implements `findAll`/`findById`/`create`/`update`/`remove`
   generically from an entity's `mapToArray()` representation; each concrete repository only
   declares its table name and how to hydrate a row back into an entity.
+- **Abstraction in the controller layer**: `AbstractController` declares the CRUD contract
+  (`index`, `show`, `create`, `store`, `edit`, `update`, `destroy`) that `BookController` and
+  `AuthorController` must implement, and hosts the behaviour they'd otherwise duplicate
+  (`redirect()`, `notFound()`) as concrete protected methods.
 - **Lazy relationships**: entities hold foreign keys (`author_id`) and resolve the related
   object only on first access (`Book::getAuthor()`, `Author::getBooks()`), instead of eagerly
   querying on every hydration.

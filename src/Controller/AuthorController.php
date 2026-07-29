@@ -8,7 +8,7 @@ use App\Entity\Author;
 use App\Repository\AuthorRepository;
 use App\View;
 
-final class AuthorController
+final class AuthorController extends AbstractController
 {
     private AuthorRepository $authors;
 
@@ -92,17 +92,5 @@ final class AuthorController
             'birth_date' => $post('birth_date'),
             'nationality' => $post('nationality'),
         ];
-    }
-
-    private function redirect(string $path): void
-    {
-        header('Location: ' . $path);
-        exit;
-    }
-
-    private function notFound(): void
-    {
-        http_response_code(404);
-        View::render('errors/404');
     }
 }

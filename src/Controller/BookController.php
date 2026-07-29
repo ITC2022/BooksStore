@@ -9,7 +9,7 @@ use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use App\View;
 
-final class BookController
+final class BookController extends AbstractController
 {
     private BookRepository $books;
     private AuthorRepository $authors;
@@ -111,17 +111,5 @@ final class BookController
             'hardcover' => isset($_POST['hardcover']) ? 1 : 0,
             'author_id' => $post('author_id'),
         ];
-    }
-
-    private function redirect(string $path): void
-    {
-        header('Location: ' . $path);
-        exit;
-    }
-
-    private function notFound(): void
-    {
-        http_response_code(404);
-        View::render('errors/404');
     }
 }
